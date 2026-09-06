@@ -60,12 +60,15 @@ export async function runWorkflow(rawQuestion, candidateProvider = deterministic
     throw new WorkflowProviderError(provider.id, error);
   }
 
+  const hasExternalEvidence = sources.length > 0 || observations.some((observation) =>
+    observation.claims.some((claim) => (claim.sourceRefs?.length ?? 0) > 0 || (claim.conflictingSourceRefs?.length ?? 0) > 0));
+
   const traces = [
     { ordinal: 1, stage: 'intake', status: 'complete' },
     ...observations.map((item, index) => ({ ordinal: index + 2, stage: `agent:${item.role}`, status: 'complete' })),
-    { ordinal: 6, stage: 'evidence:binding', status: 'complete' },
-    { ordinal: 7, stage: 'driftwatch:metrics', status: 'complete' },
-    { ordinal: 8, stage: 'orbit:interpretation', status: 'complete' },
+    ...(hasExternalEvidence ? [{ ordinal: 6, stage: 'evidence:binding', status: 'complete' }] : []),
+    { ordinal: hasExternalEvidence ? 7 : 6, stage: 'driftwatch:metrics', status: 'complete' },
+    { ordinal: hasExternalEvidence ? 8 : 7, stage: 'orbit:interpretation', status: 'complete' },
   ];
 
   const metrics = computeDriftMetrics(observations);
