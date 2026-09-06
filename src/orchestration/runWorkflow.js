@@ -7,6 +7,11 @@ import {
   assertProvider,
   WorkflowProviderError,
 } from '../providers/providerContract.js';
+import {
+  assertClaimSourceBindings,
+  assertSources,
+  normalizeProviderPayload,
+} from '../provenance/sourceEvidence.js';
 
 export const DEFAULT_PROVIDER_TIMEOUT_MS = 10_000;
 export const MAX_PROVIDER_TIMEOUT_MS = 60_000;
@@ -30,50 +35,37 @@ function normalizeTimeout(options) {
 
 function withTimeout(promise, timeoutMs) {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(
-      () => reject(new Error(`timed out after ${timeoutMs}ms`)),
-      timeoutMs,
-    );
+    const timer = setTimeout(() => reject(new Error(`timed out after ${timeoutMs}ms`)), timeoutMs);
     Promise.resolve(promise).then(
-      (value) => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      (error) => {
-        clearTimeout(timer);
-        reject(error);
-      },
+      (value) => { clearTimeout(timer); resolve(value); },
+      (error) => { clearTimeout(timer); reject(error); },
     );
   });
 }
 
-export async function runWorkflow(
-  rawQuestion,
-  candidateProvider = deterministicProvider,
-  options = {},
-) {
+export async function runWorkflow(rawQuestion, candidateProvider = deterministicProvider, options = {}) {
   const question = assertQuestion(rawQuestion);
   const provider = assertProvider(candidateProvider);
   const providerTimeoutMs = normalizeTimeout(options);
 
   let observations;
+  let sources;
   try {
     const providerCall = Promise.resolve().then(() => provider.runAgents(question));
-    observations = await withTimeout(providerCall, providerTimeoutMs);
-    assertObservations(observations);
+    const payload = normalizeProviderPayload(await withTimeout(providerCall, providerTimeoutMs));
+    observations = assertObservations(payload.observations);
+    sources = assertSources(payload.sources);
+    assertClaimSourceBindings(observations, sources);
   } catch (error) {
     throw new WorkflowProviderError(provider.id, error);
   }
 
   const traces = [
     { ordinal: 1, stage: 'intake', status: 'complete' },
-    ...observations.map((item, index) => ({
-      ordinal: index + 2,
-      stage: `agent:${item.role}`,
-      status: 'complete',
-    })),
-    { ordinal: 6, stage: 'driftwatch:metrics', status: 'complete' },
-    { ordinal: 7, stage: 'orbit:interpretation', status: 'complete' },
+    ...observations.map((item, index) => ({ ordinal: index + 2, stage: `agent:${item.role}`, status: 'complete' })),
+    { ordinal: 6, stage: 'evidence:binding', status: 'complete' },
+    { ordinal: 7, stage: 'driftwatch:metrics', status: 'complete' },
+    { ordinal: 8, stage: 'orbit:interpretation', status: 'complete' },
   ];
 
   const metrics = computeDriftMetrics(observations);
@@ -82,13 +74,10 @@ export async function runWorkflow(
   return Object.freeze({
     runId: stableId(`${provider.id}@${provider.version}:${question}`),
     mode: provider.kind ?? 'provider',
-    provider: Object.freeze({
-      id: provider.id,
-      version: provider.version,
-      kind: provider.kind ?? 'unspecified',
-    }),
+    provider: Object.freeze({ id: provider.id, version: provider.version, kind: provider.kind ?? 'unspecified' }),
     question,
     observations,
+    sources,
     metrics,
     orbit,
     traces,
