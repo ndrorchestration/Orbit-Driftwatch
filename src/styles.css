@@ -1,0 +1,94 @@
+:root {
+  color-scheme: dark;
+  --bg: #070911;
+  --panel: rgba(18, 22, 35, 0.82);
+  --panel-strong: #111625;
+  --line: rgba(255,255,255,0.09);
+  --text: #f4f7ff;
+  --muted: #9ba7bd;
+  --violet: #a78bfa;
+  --cyan: #67e8f9;
+  --green: #86efac;
+  --amber: #fde68a;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background:
+  radial-gradient(circle at 15% 10%, rgba(124,58,237,.16), transparent 32rem),
+  radial-gradient(circle at 85% 18%, rgba(8,145,178,.11), transparent 30rem),
+  var(--bg); }
+button, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 72px 0 96px; }
+.hero { max-width: 850px; margin-bottom: 30px; }
+.eyebrow, .section-label { font-size: 11px; letter-spacing: .18em; font-weight: 800; color: var(--cyan); }
+h1 { font-size: clamp(42px, 7vw, 78px); line-height: .98; letter-spacing: -.055em; margin: 14px 0 22px; max-width: 900px; }
+h2 { letter-spacing: -.025em; }
+.lede { color: #c4ccdc; font-size: 18px; line-height: 1.65; max-width: 760px; }
+.status-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px; }
+.pill, .mode-badge { border: 1px solid var(--line); background: rgba(255,255,255,.035); padding: 7px 10px; border-radius: 999px; color: #cfd6e6; font-size: 12px; }
+.panel { border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(14px); border-radius: 18px; box-shadow: 0 24px 70px rgba(0,0,0,.22); }
+.composer { padding: 20px; }
+.composer label { display: block; font-size: 12px; font-weight: 800; margin-bottom: 10px; color: #dbe2ef; }
+textarea { width: 100%; resize: vertical; min-height: 112px; background: #090d17; border: 1px solid var(--line); border-radius: 12px; color: var(--text); padding: 15px; line-height: 1.5; outline: none; }
+textarea:focus { border-color: rgba(103,232,249,.55); box-shadow: 0 0 0 3px rgba(103,232,249,.08); }
+.composer-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 14px; }
+.composer-footer p { margin: 0; color: var(--muted); font-size: 12px; }
+button { border: 0; color: #071019; background: linear-gradient(135deg, var(--cyan), #c4b5fd); font-weight: 850; padding: 11px 16px; border-radius: 10px; white-space: nowrap; }
+.results { margin-top: 48px; }
+.run-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+.run-heading h2 { max-width: 850px; margin: 8px 0 0; font-size: clamp(25px, 4vw, 38px); }
+.agent-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.agent-card { background: rgba(14,18,30,.72); border: 1px solid var(--line); border-radius: 14px; padding: 16px; min-height: 250px; }
+.agent-head { display: flex; align-items: center; gap: 8px; }
+.agent-head h3 { margin: 0; font-size: 15px; }
+.agent-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--violet); box-shadow: 0 0 16px var(--violet); }
+.agent-role { margin-left: auto; color: var(--muted); font-size: 10px; font-family: ui-monospace, monospace; }
+.agent-card > p { color: #b8c1d2; line-height: 1.55; font-size: 13px; min-height: 82px; }
+.claim-list { padding: 0; margin: 14px 0 0; list-style: none; display: grid; gap: 8px; }
+.claim { border-left: 2px solid; padding: 8px 8px 8px 10px; background: rgba(255,255,255,.025); font-size: 11px; line-height: 1.5; color: #cbd3e2; }
+.claim span { display: block; font-size: 8px; letter-spacing: .12em; font-weight: 900; margin-bottom: 4px; }
+.claim.supported { border-color: var(--green); }
+.claim.supported span { color: var(--green); }
+.claim.open { border-color: var(--amber); }
+.claim.open span { color: var(--amber); }
+.telemetry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.telemetry, .orbit { padding: 22px; }
+.telemetry h2, .orbit h2 { margin: 8px 0 22px; }
+.metric { margin: 18px 0; }
+.metric-head { display: flex; justify-content: space-between; font-size: 12px; }
+.metric-head strong { font-family: ui-monospace, monospace; color: var(--cyan); }
+.meter { height: 7px; border-radius: 99px; background: #080b13; overflow: hidden; margin: 8px 0 6px; }
+.meter span { display: block; height: 100%; background: linear-gradient(90deg, #8b5cf6, #67e8f9); border-radius: inherit; }
+.metric small { color: #78869e; font-size: 10px; }
+.stat-row { border-top: 1px solid var(--line); margin-top: 22px; padding-top: 18px; display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.stat-row div { display: grid; }
+.stat-row strong { font-size: 26px; }
+.stat-row span { color: var(--muted); font-size: 10px; }
+.orbit-block { padding: 14px 0; border-top: 1px solid var(--line); }
+.orbit-block.primary { border: 1px solid rgba(103,232,249,.14); background: rgba(103,232,249,.04); border-radius: 12px; padding: 14px; }
+.orbit-block span { font-size: 9px; letter-spacing: .16em; color: var(--violet); font-weight: 900; }
+.orbit-block p, .orbit-block li { color: #c5cddd; line-height: 1.55; font-size: 12px; }
+.orbit-block ul { padding-left: 18px; margin-bottom: 0; }
+.caveat { color: #7d8aa1; font-size: 10px; line-height: 1.5; }
+.trace { margin-top: 14px; padding: 18px 20px; overflow-x: auto; }
+.trace-line { display: flex; align-items: center; gap: 8px; min-width: 780px; margin-top: 12px; }
+.trace-line span { display: flex; align-items: center; gap: 6px; font: 10px ui-monospace, monospace; color: #aab5c8; }
+.trace-line b { width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--cyan); }
+.trace-line i { color: #4c5870; font-style: normal; }
+.error { border: 1px solid rgba(248,113,113,.3); background: rgba(248,113,113,.08); padding: 16px; border-radius: 12px; }
+
+@media (max-width: 900px) {
+  .agent-grid { grid-template-columns: 1fr 1fr; }
+  .telemetry-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .shell { width: min(100% - 22px, 1180px); padding-top: 42px; }
+  .agent-grid { grid-template-columns: 1fr; }
+  .composer-footer, .run-heading { align-items: stretch; flex-direction: column; }
+  button { width: 100%; }
+}
