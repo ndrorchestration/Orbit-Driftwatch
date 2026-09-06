@@ -8,13 +8,13 @@ function assertRun(run) {
 }
 
 /**
- * Produce a portable, deterministic record of a completed run.
- * No wall-clock timestamp is inserted so identical deterministic runs can
- * serialize byte-for-byte identically.
+ * Produce a portable record of a completed run. Deterministic runs intentionally
+ * omit a wall-clock timestamp and omit an empty sources field so the original
+ * frozen control fixture remains byte-for-byte stable.
  */
 export function buildRunArtifact(run) {
   assertRun(run);
-  return {
+  const artifact = {
     schemaVersion: RUN_ARTIFACT_SCHEMA,
     application: 'Orbit Driftwatch',
     artifactVersion: '0.2.0',
@@ -28,6 +28,8 @@ export function buildRunArtifact(run) {
     traces: run.traces,
     epistemicNote: 'Workflow telemetry and evidence tags are not measures of factual truth or model quality.',
   };
+  if (Array.isArray(run.sources) && run.sources.length > 0) artifact.sources = run.sources;
+  return artifact;
 }
 
 export function serializeRunArtifact(run) {
