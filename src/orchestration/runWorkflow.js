@@ -8,6 +8,9 @@ import {
   WorkflowProviderError,
 } from '../providers/providerContract.js';
 
+export const DEFAULT_PROVIDER_TIMEOUT_MS = 10_000;
+export const MAX_PROVIDER_TIMEOUT_MS = 60_000;
+
 function stableId(value) {
   let hash = 2166136261;
   for (const character of value) {
@@ -17,13 +20,46 @@ function stableId(value) {
   return `od-${(hash >>> 0).toString(16).padStart(8, '0')}`;
 }
 
-export async function runWorkflow(rawQuestion, candidateProvider = deterministicProvider) {
+function normalizeTimeout(options) {
+  const value = options?.providerTimeoutMs ?? DEFAULT_PROVIDER_TIMEOUT_MS;
+  if (!Number.isFinite(value) || value <= 0 || value > MAX_PROVIDER_TIMEOUT_MS) {
+    throw new TypeError(`providerTimeoutMs must be > 0 and <= ${MAX_PROVIDER_TIMEOUT_MS}.`);
+  }
+  return value;
+}
+
+function withTimeout(promise, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(`timed out after ${timeoutMs}ms`)),
+      timeoutMs,
+    );
+    Promise.resolve(promise).then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
+export async function runWorkflow(
+  rawQuestion,
+  candidateProvider = deterministicProvider,
+  options = {},
+) {
   const question = assertQuestion(rawQuestion);
   const provider = assertProvider(candidateProvider);
+  const providerTimeoutMs = normalizeTimeout(options);
 
   let observations;
   try {
-    observations = await provider.runAgents(question);
+    const providerCall = Promise.resolve().then(() => provider.runAgents(question));
+    observations = await withTimeout(providerCall, providerTimeoutMs);
     assertObservations(observations);
   } catch (error) {
     throw new WorkflowProviderError(provider.id, error);
