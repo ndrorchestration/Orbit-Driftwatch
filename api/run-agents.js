@@ -1,3 +1,5 @@
+import { extractWebSources, sourceCatalogForPrompt } from './lib/webEvidence.js';
+
 const ROLES = ['planner', 'researcher', 'skeptic', 'verifier'];
 const DEFAULT_MODEL = 'gpt-5.6-luna';
 const MAX_QUESTION_CHARS = 6000;
@@ -21,8 +23,23 @@ function parseJsonText(text) {
   return JSON.parse(unfenced);
 }
 
-function prompt(question) {
-  return `You are the execution provider for Orbit Driftwatch, an observable multi-agent workflow.\n\nQuestion: ${question}\n\nReturn JSON only: an array of exactly four objects in this exact role order: planner, researcher, skeptic, verifier. Each object must have role, label, summary, stance, claims. stance is a number from -1 to 1 describing the role's position for workflow observability, not factual truth. claims is an array; each claim must have text, supported, evidence, sourceRefs, conflictingSourceRefs. evidence contains workflow-local tags only. Because this endpoint does not perform retrieval, sourceRefs and conflictingSourceRefs MUST be empty arrays and substantive factual claims that would require external evidence MUST use supported=false. Do not fabricate citations, URLs, source identifiers, or empirical verification. Keep summaries under 1200 characters and each role to at most 8 claims.`;
+async function createResponse(apiKey, body) {
+  const upstream = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(45_000),
+  });
+  if (!upstream.ok) {
+    const detail = (await upstream.text()).replace(/\s+/g, ' ').slice(0, 300);
+    throw new Error(`OpenAI Responses API returned ${upstream.status}: ${detail}`);
+  }
+  return upstream.json();
+}
+
+function synthesisPrompt(question, sources, researchText) {
+  const catalog = sourceCatalogForPrompt(sources);
+  return `You are the execution provider for Orbit Driftwatch, an observable multi-agent workflow.\n\nQuestion: ${question}\n\nA separate web-search pass produced this source catalog:\n${catalog || '(no web sources returned)'}\n\nResearch synthesis from that search pass:\n${researchText.slice(0, 12000)}\n\nReturn JSON only: an array of exactly four objects in this exact role order: planner, researcher, skeptic, verifier. Each object must have role, label, summary, stance, claims. stance is a number from -1 to 1 describing the role's position for workflow observability, not factual truth. claims is an array; each claim must have text, supported, evidence, sourceRefs, conflictingSourceRefs. evidence contains workflow-local tags only. sourceRefs and conflictingSourceRefs may contain ONLY IDs from the catalog above. A factual claim may use supported=true only when its sourceRefs identify evidence that actually supports it. If no catalog source supports a factual claim, set supported=false and sourceRefs=[]. Use conflictingSourceRefs when catalog sources materially conflict. Never invent citations, URLs, source IDs, empirical verification, or consensus. Keep summaries under 1200 characters and each role to at most 8 claims.`;
 }
 
 export default async function handler(req, res) {
@@ -41,25 +58,26 @@ export default async function handler(req, res) {
 
   const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
   try {
-    const upstream = await fetch('https://api.openai.com/v1/responses', {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${apiKey}`,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({ model, input: prompt(question) }),
-      signal: AbortSignal.timeout(45_000),
+    const research = await createResponse(apiKey, {
+      model,
+      tools: [{ type: 'web_search_preview' }],
+      include: ['web_search_call.action.sources'],
+      input: `Research this question for a later evidence-bound multi-agent analysis. Prefer primary or authoritative sources, identify material disagreement, and do not fabricate sources. Question: ${question}`,
     });
 
-    if (!upstream.ok) {
-      const detail = (await upstream.text()).replace(/\s+/g, ' ').slice(0, 300);
-      throw new Error(`OpenAI Responses API returned ${upstream.status}: ${detail}`);
-    }
+    const sources = extractWebSources(research);
+    const researchText = outputText(research);
 
-    const response = await upstream.json();
-    const parsed = parseJsonText(outputText(response));
-    if (!Array.isArray(parsed) || parsed.length !== ROLES.length) throw new Error('Model response did not contain exactly four observations.');
-    return res.status(200).json({ observations: parsed, sources: [] });
+    const synthesis = await createResponse(apiKey, {
+      model,
+      input: synthesisPrompt(question, sources, researchText),
+    });
+
+    const parsed = parseJsonText(outputText(synthesis));
+    if (!Array.isArray(parsed) || parsed.length !== ROLES.length) {
+      throw new Error('Model response did not contain exactly four observations.');
+    }
+    return res.status(200).json({ observations: parsed, sources });
   } catch (error) {
     console.error('[orbit-driftwatch:model-provider]', error);
     return res.status(502).json({ error: 'Hosted model execution failed closed.' });
