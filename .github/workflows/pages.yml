@@ -1,8 +1,10 @@
 name: Deploy public showcase
 
+# Pages site creation currently requires repository administration permission
+# that is not available to the connected GitHub integration. Keep this manual
+# so ordinary main pushes remain green until Pages is enabled by an authorized
+# repository administrator.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
