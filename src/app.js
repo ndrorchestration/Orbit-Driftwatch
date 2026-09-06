@@ -1,4 +1,5 @@
 import { runWorkflow } from './orchestration/runWorkflow.js';
+import { serializeRunArtifact } from './provenance/runArtifact.js';
 
 const app = document.querySelector('#app');
 const defaultQuestion = 'How should a university design a transparent policy for generative AI in take-home assignments?';
@@ -11,7 +12,8 @@ app.innerHTML = `
       <p class="lede">Watch a role-based workflow separate claims, disagreement, evidence state, and unresolved questions—then translate the machinery into plain language.</p>
       <div class="status-row">
         <span class="pill">Deterministic demo</span>
-        <span class="pill">No API key</span>
+        <span class="pill">Provider contract</span>
+        <span class="pill">Exportable run artifact</span>
         <span class="pill">No truth-score claims</span>
       </div>
     </header>
@@ -20,7 +22,7 @@ app.innerHTML = `
       <label for="question">Research or reasoning question</label>
       <textarea id="question" rows="4"></textarea>
       <div class="composer-footer">
-        <p>Current mode demonstrates system mechanics; it does not retrieve sources or perform model inference.</p>
+        <p>Current provider demonstrates system mechanics; it does not retrieve sources or perform model inference.</p>
         <button id="run-button" type="button">Run observable workflow</button>
       </div>
     </section>
@@ -54,6 +56,18 @@ function meter(label, value, detail) {
   `;
 }
 
+function downloadRun(run) {
+  const blob = new Blob([serializeRunArtifact(run)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `${run.runId}.orbit-driftwatch.json`;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
 function render(run) {
   const agentCards = run.observations.map((agent) => `
     <article class="agent-card">
@@ -79,8 +93,12 @@ function render(run) {
       <div>
         <span class="eyebrow">RUN ${esc(run.runId)}</span>
         <h2>${esc(run.question)}</h2>
+        <p class="provider-line">Provider: ${esc(run.provider.id)} · v${esc(run.provider.version)} · ${esc(run.provider.kind)}</p>
       </div>
-      <span class="mode-badge">${esc(run.mode)}</span>
+      <div class="run-actions">
+        <span class="mode-badge">${esc(run.mode)}</span>
+        <button id="download-run" class="secondary" type="button">Export run JSON</button>
+      </div>
     </section>
 
     <section class="agent-grid">${agentCards}</section>
@@ -116,13 +134,20 @@ function render(run) {
       </div>
     </section>
   `;
+
+  document.querySelector('#download-run')?.addEventListener('click', () => downloadRun(run));
 }
 
-function execute() {
+async function execute() {
+  runButton.disabled = true;
+  runButton.textContent = 'Running…';
   try {
-    render(runWorkflow(questionInput.value));
+    render(await runWorkflow(questionInput.value));
   } catch (error) {
     results.innerHTML = `<div class="error">${esc(error.message)}</div>`;
+  } finally {
+    runButton.disabled = false;
+    runButton.textContent = 'Run observable workflow';
   }
 }
 
