@@ -1,0 +1,14 @@
+{
+  "name": "orbit-driftwatch",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Observable multi-agent reasoning showcase",
+  "scripts": {
+    "test": "node --test",
+    "verify": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
