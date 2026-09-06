@@ -17,7 +17,8 @@ Orbit Driftwatch is an observable multi-agent reasoning workspace that exposes r
 5. Claims can remain unresolved instead of being forced into a confident synthesis.
 6. Internal telemetry is translated into ordinary language.
 7. Completed runs can be exported with provider identity and epistemic caveats.
-8. The project explicitly distinguishes implementation evidence from efficacy claims.
+8. A frozen example artifact is reproducible and digest-bound in CI.
+9. The project explicitly distinguishes implementation evidence from efficacy claims.
 
 ## Handshake-ready gate
 
@@ -27,12 +28,12 @@ Do not describe this as a working AI research system until all of the following 
 - [x] deterministic/offline provider remains available for reproducible tests;
 - [x] provider outage and malformed-output paths are tested;
 - [x] portable run artifacts preserve provider identity;
+- [x] one deterministic example run is frozen, digest-bound, and reproduced in CI;
 - [ ] at least one real model provider is integrated behind the role contract;
 - [ ] secrets stay server-side or otherwise outside public client bundles;
 - [ ] retrieval/source identity is implemented if factual research is demonstrated;
 - [ ] timeout/partial-role/hostile-output paths have explicit tests;
 - [ ] a public deployment works from a clean browser session;
-- [ ] one example run is captured with exact source/version provenance;
 - [ ] README screenshots match the deployed product;
 - [ ] accessibility and responsive behavior receive a manual pass;
 - [ ] claims in the Handshake description are checked against repository evidence.
