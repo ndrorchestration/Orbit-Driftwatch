@@ -12,13 +12,14 @@ Orbit Driftwatch is an observable multi-agent reasoning workspace that exposes r
 
 1. The system has explicit roles rather than a single undifferentiated prompt.
 2. Execution providers sit behind a defined asynchronous contract.
-3. Provider failures and malformed outputs fail closed.
-4. Intermediate state is inspectable rather than hidden behind the final answer.
-5. Claims can remain unresolved instead of being forced into a confident synthesis.
-6. Internal telemetry is translated into ordinary language.
-7. Completed runs can be exported with provider identity and epistemic caveats.
-8. A frozen example artifact is reproducible and digest-bound in CI.
-9. The project explicitly distinguishes implementation evidence from efficacy claims.
+3. Provider failures, timeouts, malformed outputs, and out-of-contract roles fail closed.
+4. Provider text is bounded by contract and escaped before UI insertion.
+5. Intermediate state is inspectable rather than hidden behind the final answer.
+6. Claims can remain unresolved instead of being forced into a confident synthesis.
+7. Internal telemetry is translated into ordinary language.
+8. Completed runs can be exported with provider identity and epistemic caveats.
+9. A frozen example artifact is reproducible and digest-bound in CI.
+10. The project explicitly distinguishes implementation evidence from efficacy claims.
 
 ## Handshake-ready gate
 
@@ -27,12 +28,12 @@ Do not describe this as a working AI research system until all of the following 
 - [x] provider-neutral asynchronous execution contract exists;
 - [x] deterministic/offline provider remains available for reproducible tests;
 - [x] provider outage and malformed-output paths are tested;
+- [x] provider timeout, partial-role, duplicate-role, hostile-markup, and output-boundary paths are tested;
 - [x] portable run artifacts preserve provider identity;
 - [x] one deterministic example run is frozen, digest-bound, and reproduced in CI;
 - [ ] at least one real model provider is integrated behind the role contract;
 - [ ] secrets stay server-side or otherwise outside public client bundles;
 - [ ] retrieval/source identity is implemented if factual research is demonstrated;
-- [ ] timeout/partial-role/hostile-output paths have explicit tests;
 - [ ] a public deployment works from a clean browser session;
 - [ ] README screenshots match the deployed product;
 - [ ] accessibility and responsive behavior receive a manual pass;

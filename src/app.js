@@ -1,5 +1,6 @@
 import { runWorkflow } from './orchestration/runWorkflow.js';
 import { serializeRunArtifact } from './provenance/runArtifact.js';
+import { boundedErrorMessage, escapeHtml } from './ui/sanitize.js';
 
 const app = document.querySelector('#app');
 const defaultQuestion = 'How should a university design a transparent policy for generative AI in take-home assignments?';
@@ -13,6 +14,7 @@ app.innerHTML = `
       <div class="status-row">
         <span class="pill">Deterministic demo</span>
         <span class="pill">Provider contract</span>
+        <span class="pill">Fail-closed boundary</span>
         <span class="pill">Exportable run artifact</span>
         <span class="pill">No truth-score claims</span>
       </div>
@@ -37,12 +39,7 @@ const results = document.querySelector('#results');
 questionInput.value = defaultQuestion;
 
 function esc(value) {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
+  return escapeHtml(value);
 }
 
 function meter(label, value, detail) {
@@ -144,7 +141,7 @@ async function execute() {
   try {
     render(await runWorkflow(questionInput.value));
   } catch (error) {
-    results.innerHTML = `<div class="error">${esc(error.message)}</div>`;
+    results.innerHTML = `<div class="error">${esc(boundedErrorMessage(error))}</div>`;
   } finally {
     runButton.disabled = false;
     runButton.textContent = 'Run observable workflow';
