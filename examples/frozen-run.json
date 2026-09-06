@@ -1,0 +1,144 @@
+{
+  "schemaVersion": "orbit-driftwatch.run.v1",
+  "application": "Orbit Driftwatch",
+  "artifactVersion": "0.2.0",
+  "runId": "od-df072e91",
+  "mode": "offline-fixture",
+  "provider": {
+    "id": "deterministic-demo",
+    "version": "1.0.0",
+    "kind": "offline-fixture"
+  },
+  "question": "How should a university design a transparent policy for generative AI in take-home assignments?",
+  "observations": [
+    {
+      "role": "planner",
+      "label": "Planner",
+      "stance": 0,
+      "summary": "Decomposed “How should a university design a transparent policy for generative AI in take-home assignments?” into evidence, stakeholder, counterargument, and uncertainty lanes.",
+      "claims": [
+        {
+          "text": "The workflow should separate observations, interpretations, and unresolved uncertainty.",
+          "supported": true,
+          "evidence": [
+            "workflow:planning-contract"
+          ]
+        }
+      ]
+    },
+    {
+      "role": "researcher",
+      "label": "Researcher",
+      "stance": 0.35,
+      "summary": "Built the affirmative evidence lane and marked which statements would require external sourcing.",
+      "claims": [
+        {
+          "text": "A defensible answer should bind substantive factual claims to identifiable evidence.",
+          "supported": true,
+          "evidence": [
+            "method:claim-evidence-binding"
+          ]
+        },
+        {
+          "text": "The available evidence probably favors one dominant answer to “How should a university design a transparent policy for generative AI in take-home assignments?”.",
+          "supported": false,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "role": "skeptic",
+      "label": "Skeptic",
+      "stance": -0.45,
+      "summary": "Applied an explicit counterposition and searched the workflow state for unsupported assumptions.",
+      "claims": [
+        {
+          "text": "Alternative explanations should remain visible until evidence or a decision rule resolves them.",
+          "supported": true,
+          "evidence": [
+            "method:counterposition-contract"
+          ]
+        },
+        {
+          "text": "Important counterevidence may be missing from the current input.",
+          "supported": false,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "role": "verifier",
+      "label": "Verifier",
+      "stance": 0.05,
+      "summary": "Checked claim tags and refused to promote unsupported statements into verified findings.",
+      "claims": [
+        {
+          "text": "This run contains claims that remain unsupported and must be qualified in the final interpretation.",
+          "supported": true,
+          "evidence": [
+            "trace:researcher/claim-2",
+            "trace:skeptic/claim-2"
+          ]
+        }
+      ]
+    }
+  ],
+  "metrics": {
+    "disagreement": 0.4,
+    "evidenceCoverage": 0.667,
+    "unsupportedClaims": 2,
+    "convergence": 0.6,
+    "observedRoles": 4
+  },
+  "orbit": {
+    "today": "2 claims remain unsupported in this run, so the workflow should not present them as established findings.",
+    "patterns": [
+      "Role stance spread produced a 40% disagreement reading.",
+      "Mechanically tagged evidence coverage is 67% across the current claims.",
+      "The role stances remain meaningfully separated under this demo definition."
+    ],
+    "openQuestions": [
+      "The available evidence probably favors one dominant answer to “How should a university design a transparent policy for generative AI in take-home assignments?”.",
+      "Important counterevidence may be missing from the current input."
+    ],
+    "caveat": "These readings describe internal workflow state. They do not measure factual truth, correctness, or model quality."
+  },
+  "traces": [
+    {
+      "ordinal": 1,
+      "stage": "intake",
+      "status": "complete"
+    },
+    {
+      "ordinal": 2,
+      "stage": "agent:planner",
+      "status": "complete"
+    },
+    {
+      "ordinal": 3,
+      "stage": "agent:researcher",
+      "status": "complete"
+    },
+    {
+      "ordinal": 4,
+      "stage": "agent:skeptic",
+      "status": "complete"
+    },
+    {
+      "ordinal": 5,
+      "stage": "agent:verifier",
+      "status": "complete"
+    },
+    {
+      "ordinal": 6,
+      "stage": "driftwatch:metrics",
+      "status": "complete"
+    },
+    {
+      "ordinal": 7,
+      "stage": "orbit:interpretation",
+      "status": "complete"
+    }
+  ],
+  "epistemicNote": "Workflow telemetry and evidence tags are not measures of factual truth or model quality."
+}
