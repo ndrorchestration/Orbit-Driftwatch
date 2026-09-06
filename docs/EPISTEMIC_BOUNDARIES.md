@@ -6,19 +6,24 @@ This document defines what Orbit Driftwatch may and may not claim from the curre
 
 ### VERIFIED BY REPOSITORY TESTS
 
-- identical input produces identical deterministic workflow output;
+- identical input/provider identity produces identical deterministic workflow output;
 - the expected four role identities are executed in order;
 - observability metrics follow their documented formulas;
 - unsupported claims remain visible in Orbit's Open Questions view;
-- underspecified inputs fail rather than producing a fabricated run.
+- underspecified inputs fail rather than producing a fabricated run;
+- provider outages become explicit workflow failures;
+- malformed provider output is rejected rather than silently normalized;
+- deterministic run artifacts preserve provider identity and serialize byte-for-byte identically.
 
 ### IMPLEMENTED, NOT EXTERNALLY VALIDATED
 
 - role-based orchestration;
+- asynchronous provider contract;
 - workflow trace representation;
 - evidence/support tags;
 - disagreement and convergence telemetry;
-- Orbit plain-language interpretation.
+- Orbit plain-language interpretation;
+- versioned run-artifact export.
 
 ### NOT IMPLEMENTED YET
 
@@ -26,7 +31,7 @@ This document defines what Orbit Driftwatch may and may not claim from the curre
 - live retrieval;
 - source authentication;
 - factual claim verification against external evidence;
-- durable run persistence/replay;
+- durable server-side run persistence/replay;
 - production authentication/authorization;
 - production rate limiting and abuse controls.
 
@@ -47,6 +52,14 @@ The repository does not currently establish that:
 Use **observed**, **computed**, **tagged**, **implemented**, and **tested** when those words match the evidence.
 
 Avoid **truth score**, **certified**, **validated accuracy**, **proven improvement**, **safe**, or **production-ready** unless a later evidence artifact independently supports the claim.
+
+## Provider failures
+
+Provider exceptions and schema violations fail closed. A failed provider run produces no synthetic replacement observations. This behavior verifies the failure contract only; it does not establish availability or resilience of any future external provider.
+
+## Run artifacts
+
+A run artifact is evidence of what this application recorded for a run. It is not evidence that the recorded claims are factually correct. Provider identity and version are preserved so later comparisons do not silently collapse distinct execution conditions.
 
 ## Cross-repository provenance
 

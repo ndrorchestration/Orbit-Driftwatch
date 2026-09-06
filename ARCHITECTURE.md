@@ -1,14 +1,14 @@
 # Architecture
 
-Orbit Driftwatch is intentionally divided into three responsibilities: orchestration, observability, and interpretation.
+Orbit Driftwatch is divided into four responsibilities: provider boundary, orchestration, observability, and interpretation/provenance.
 
 ```mermaid
 flowchart TD
-    U[User question] --> O[Orchestration]
-    O --> P[Planner]
-    O --> R[Researcher]
-    O --> S[Skeptic]
-    O --> V[Verifier]
+    U[User question] --> PB[Provider contract]
+    PB --> P[Planner]
+    PB --> R[Researcher]
+    PB --> S[Skeptic]
+    PB --> V[Verifier]
     P --> T[Execution trace]
     R --> T
     S --> T
@@ -20,13 +20,22 @@ flowchart TD
     D --> I[Orbit interpretation]
     T --> I
     I --> UI[Today / Patterns / Open Questions]
+    UI --> A[Portable run artifact]
 ```
 
-## 1. Orchestration
+## 1. Provider boundary
 
-`src/orchestration/` owns execution order and role contracts. The current workers are deterministic fixtures so architecture can be tested without external credentials or non-deterministic model behavior.
+`src/providers/` defines the contract between orchestration and an execution provider. Providers carry stable `id` and `version` fields and implement asynchronous `runAgents(question)`.
 
-The role contract is intentionally narrow:
+The current `deterministic-demo` provider is an offline fixture. Future hosted or local model providers must satisfy the same observation contract. Provider failures and malformed observations are explicit errors; the workflow does not fabricate substitute success output.
+
+## 2. Orchestration
+
+`src/orchestration/` owns execution state and the expected role order:
+
+`Planner → Researcher → Skeptic → Verifier`
+
+Each observation contains:
 
 - role identity,
 - user-visible summary,
@@ -34,44 +43,45 @@ The role contract is intentionally narrow:
 - explicit claims,
 - explicit support/evidence tags.
 
-A future model adapter should return this contract rather than allowing provider-specific response objects to leak into the rest of the system.
+Provider-specific response objects must not leak past the provider boundary.
 
-## 2. Driftwatch
+## 3. Driftwatch
 
-`src/driftwatch/` computes mechanically defined telemetry from the role observations.
+`src/driftwatch/` computes mechanically defined telemetry from validated role observations.
 
-Current disagreement is simply the normalized range of role stance values. Evidence coverage is the fraction of claims with both a supported flag and at least one evidence tag. Convergence is defined as `1 - disagreement`.
+Current disagreement is the normalized range of role stance values. Evidence coverage is the fraction of claims with both a supported flag and at least one evidence tag. Convergence is defined as `1 - disagreement`.
 
-These definitions are intentionally simple and inspectable. They are not presented as calibrated proxies for truth or answer quality.
+These definitions are intentionally simple and inspectable. They are not calibrated proxies for truth or answer quality.
 
-## 3. Orbit
+## 4. Orbit + provenance
 
-`src/orbit/` converts internal metrics and unresolved claim state into language a non-technical reviewer can understand.
-
-The primary user model is:
+`src/orbit/` converts metrics and unresolved claim state into language a non-technical reviewer can understand:
 
 - **Today** — what matters in the current run.
-- **Patterns** — recurring or structural readings from the workflow.
-- **Open Questions** — what remains unresolved and should not be silently promoted into a conclusion.
+- **Patterns** — structural readings from the workflow.
+- **Open Questions** — what remains unresolved.
+
+`src/provenance/` exports completed runs using a versioned JSON schema. Deterministic runs intentionally omit a wall-clock timestamp so identical runs can serialize byte-for-byte identically.
 
 ## Boundary rules
 
 1. UI cannot silently upgrade an unsupported claim to a verified one.
 2. Telemetry cannot be labeled as factual accuracy without separate validation evidence.
 3. Provider adapters cannot grant new authority to a role implicitly.
-4. Failure in an agent/provider must become explicit workflow state rather than fabricated output.
+4. Provider failure or malformed output must become explicit failure state rather than fabricated output.
 5. External source evidence, when added, must preserve source identity and claim binding.
+6. Run artifacts must identify the provider and provider version that produced the observations.
 
-## Planned provider boundary
+## Provider topology
 
 ```text
-Role contract
-     ↑
-     │
-ProviderAdapter
- ├─ deterministic demo (current)
- ├─ hosted model adapter (planned)
- └─ local model adapter (planned)
+Role observation contract
+          ↑
+          │
+   Provider boundary
+   ├─ deterministic demo (implemented)
+   ├─ hosted model provider (planned)
+   └─ local model provider (planned)
 ```
 
-The deterministic adapter remains useful after model integration as a stable test fixture and offline demonstration mode.
+The deterministic provider remains useful after model integration as a stable test fixture and offline demonstration mode.

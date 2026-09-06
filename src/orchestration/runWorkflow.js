@@ -1,7 +1,12 @@
 import { assertQuestion } from '../domain/schema.js';
 import { computeDriftMetrics } from '../driftwatch/metrics.js';
 import { interpretRun } from '../orbit/interpret.js';
-import { runDemoAgents } from './demoAgents.js';
+import { deterministicProvider } from '../providers/deterministicProvider.js';
+import {
+  assertObservations,
+  assertProvider,
+  WorkflowProviderError,
+} from '../providers/providerContract.js';
 
 function stableId(value) {
   let hash = 2166136261;
@@ -12,9 +17,18 @@ function stableId(value) {
   return `od-${(hash >>> 0).toString(16).padStart(8, '0')}`;
 }
 
-export function runWorkflow(rawQuestion) {
+export async function runWorkflow(rawQuestion, candidateProvider = deterministicProvider) {
   const question = assertQuestion(rawQuestion);
-  const observations = runDemoAgents(question);
+  const provider = assertProvider(candidateProvider);
+
+  let observations;
+  try {
+    observations = await provider.runAgents(question);
+    assertObservations(observations);
+  } catch (error) {
+    throw new WorkflowProviderError(provider.id, error);
+  }
+
   const traces = [
     { ordinal: 1, stage: 'intake', status: 'complete' },
     ...observations.map((item, index) => ({
@@ -30,8 +44,13 @@ export function runWorkflow(rawQuestion) {
   const orbit = interpretRun(observations, metrics);
 
   return Object.freeze({
-    runId: stableId(question),
-    mode: 'deterministic-demo',
+    runId: stableId(`${provider.id}@${provider.version}:${question}`),
+    mode: provider.kind ?? 'provider',
+    provider: Object.freeze({
+      id: provider.id,
+      version: provider.version,
+      kind: provider.kind ?? 'unspecified',
+    }),
     question,
     observations,
     metrics,
