@@ -5,8 +5,8 @@
   "type": "module",
   "description": "Observable multi-agent reasoning showcase",
   "scripts": {
-    "test": "node --test",
-    "verify": "node --test"
+    "test": "node --check src/app.js && node --test",
+    "verify": "npm test"
   },
   "engines": {
     "node": ">=20"
