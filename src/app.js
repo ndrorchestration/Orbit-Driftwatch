@@ -20,6 +20,7 @@ app.innerHTML = `
         <span class="pill">Source provenance contract</span>
         <span class="pill">No truth-score claims</span>
       </div>
+      <p style="margin-top:18px"><a href="./claim-audit.html" style="color:#67e8f9;font-weight:800;text-decoration:none">Open the claim-to-evidence readiness audit →</a></p>
     </header>
 
     <section class="composer panel">
