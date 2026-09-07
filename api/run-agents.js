@@ -77,7 +77,19 @@ export default async function handler(req, res) {
     if (!Array.isArray(parsed) || parsed.length !== ROLES.length) {
       throw new Error('Model response did not contain exactly four observations.');
     }
-    return res.status(200).json({ observations: parsed, sources });
+
+    return res.status(200).json({
+      observations: parsed,
+      sources,
+      provider: {
+        id: 'openai-responses-server',
+        model,
+        retrieval: 'web_search',
+        researchResponseId: research?.id ?? null,
+        synthesisResponseId: synthesis?.id ?? null,
+      },
+      generatedAt: new Date().toISOString(),
+    });
   } catch (error) {
     console.error('[orbit-driftwatch:model-provider]', error);
     return res.status(502).json({ error: 'Hosted model execution failed closed.' });

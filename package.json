@@ -5,9 +5,10 @@
   "type": "module",
   "description": "Observable multi-agent reasoning showcase",
   "scripts": {
-    "test": "node --check src/app.js && node --check src/claim-audit-app.js && node --test",
+    "test": "node --check src/app.js && node --check src/claim-audit-app.js && node --check scripts/verify-live-run.mjs && node --test",
     "verify": "npm test",
-    "verify:deployment": "node scripts/verify-deployment.mjs"
+    "verify:deployment": "node scripts/verify-deployment.mjs",
+    "verify:live": "node scripts/verify-live-run.mjs"
   },
   "engines": {
     "node": ">=20"
