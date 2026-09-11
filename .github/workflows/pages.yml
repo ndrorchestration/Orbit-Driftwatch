@@ -1,9 +1,10 @@
 name: Deploy public showcase
 
-# Pages site creation currently requires repository administration permission
+# Pages site creation/enabling requires repository administration permission
 # that is not available to the connected GitHub integration. Keep this manual
-# so ordinary main pushes remain green until Pages is enabled by an authorized
-# repository administrator.
+# and require an authorized repository administrator to enable Pages first.
+# Once enabled, this workflow configures and deploys the existing Pages site;
+# it does not attempt to change repository administration settings.
 on:
   workflow_dispatch:
 
@@ -25,10 +26,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Configure and enable Pages
+      - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
