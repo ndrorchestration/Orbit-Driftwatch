@@ -207,9 +207,9 @@ Orbit-Driftwatch/
 
 ## Relationship to other projects
 
-Orbit Driftwatch is an independent integration/showcase application. It adapts patterns from Orbit and Driftwatch, but cross-repository lineage does not transfer validation or evidence. DGAF, Tektite, MORSE, Amethyst, and Agent Control Plane remain separate projects with separate evidence boundaries.
+Orbit Driftwatch is an independent integration/showcase application. It adapts patterns from Orbit and Driftwatch, but cross-repository lineage does not transfer validation or evidence. Agentic Governance Orchestrator (proposed successor name for DGAF), Tektite, MORSE, Amethyst, and Agent Control Plane remain separate projects with separate evidence boundaries.
 
-The claim-to-evidence demonstration uses governance concepts that are relevant to those systems, but it does **not** import or upgrade their evidence state. A real DGAF/PDMAL readiness decision must still resolve through that project's own exact-bound governance and evidence records.
+The claim-to-evidence demonstration uses governance concepts that are relevant to those systems, but it does **not** import or upgrade their evidence state. A real readiness decision for the Agentic Governance Orchestrator (DGAF lineage) / PDMAL must still resolve through that project's own exact-bound governance and evidence records.
 
 ## Remaining promotion gates
 
